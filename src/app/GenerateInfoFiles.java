@@ -12,13 +12,13 @@ import java.util.*;
  * que servirán como entrada para el programa principal del proyecto.
  *
  * Archivos generados:
- *  - data/productos.txt
- *  - data/vendedores.txt
- *  - data/ventas/ventas_{TipoDoc}_{NumeroDoc}.txt (uno por vendedor)
+ *  - data/productos.csv
+ *  - data/vendedores.csv
+ *  - data/ventas/ventas_{TipoDoc}_{NumeroDoc}csv(uno por vendedor)
  *
  * Requisitos de formato:
- *  productos.txt: ID;Nombre;Precio
- *  vendedores.txt: TipoDocumento;NumeroDocumento;Nombres;Apellidos
+ *  productos.csv: ID;Nombre;Precio
+ *  vendedorescsvTipoDocumento;NumeroDocumento;Nombres;Apellidos
  *  ventas por vendedor:
  *      1a línea: TipoDocumentoVendedor;NumeroDocumentoVendedor
  *      siguientes líneas: IDProducto;Cantidad
@@ -30,8 +30,8 @@ public class GenerateInfoFiles {
     // === Configuración general ===
     private static final Path DATA_DIR   = Paths.get("data");
     private static final Path SALES_DIR  = DATA_DIR.resolve("ventas");
-    private static final Path PRODUCTS_FILE   = DATA_DIR.resolve("productos.txt");
-    private static final Path SALESMEN_FILE   = DATA_DIR.resolve("vendedores.txt");
+    private static final Path PRODUCTS_FILE   = DATA_DIR.resolve("productos.csv");
+    private static final Path SALESMEN_FILE   = DATA_DIR.resolve("vendedores.csv");
 
     // Semilla fija para reproducibilidad (cambia si quieres otra corrida)
     private static final Random RNG = new Random(2025_0902);
@@ -130,9 +130,9 @@ public class GenerateInfoFiles {
             catalog = readCatalogFromFile(PRODUCTS_FILE);
         }
 
-        // Nombre de archivo: ventas_{TipoDoc}_{NumeroDoc}.txt
+        // Nombre de archivo: ventas_{TipoDoc}_{NumeroDoc}.csv
         String safeName = name == null ? "" : name.replaceAll("[^\\p{L}\\p{N}\\s_-]", "").trim();
-        Path file = SALES_DIR.resolve(String.format("ventas_%s_%d.txt", tipoDoc, id));
+        Path file = SALES_DIR.resolve(String.format("ventas_%s_%d.csv", tipoDoc, id));
 
         try (BufferedWriter bw = Files.newBufferedWriter(file, StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
