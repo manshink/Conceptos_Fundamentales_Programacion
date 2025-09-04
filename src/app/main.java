@@ -6,11 +6,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * 
- *  
- */
-
 class Producto {
     String id, nombre;
     double precio;
@@ -45,8 +40,9 @@ public class main {
         try {
             System.out.println("Iniciando...");
 
+            // === Archivos base ===
             Map<String, Producto> mapaProductos = cargarDatos(
-                "productos.csv",
+                "data/productos.csv",
                 linea -> {
                     String[] d = linea.split(";");
                     return new Producto(d[0], d[1], Double.parseDouble(d[2]));
@@ -55,7 +51,7 @@ public class main {
             );
 
             Map<String, Vendedor> mapaVendedores = cargarDatos(
-                "vendedores.csv",
+                "data/vendedores.csv",
                 linea -> {
                     String[] d = linea.split(";");
                     return new Vendedor(d[0], d[1], d[2], d[3]);
@@ -63,13 +59,15 @@ public class main {
                 Vendedor::getNumDoc
             );
 
-            Files.walk(Paths.get("."))
+            // === Archivos de ventas ===
+            Files.walk(Paths.get("data/ventas"))
                 .filter(path -> path.getFileName().toString().startsWith("vendedor_"))
                 .forEach(path -> procesarArchivoVenta(path, mapaProductos, mapaVendedores));
 
+            // === Generar reportes ===
             generarReportes(mapaVendedores, mapaProductos);
 
-            System.out.println("¡Reportes generados!");
+            System.out.println("¡Reportes generados en la carpeta raíz!");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -81,6 +79,7 @@ public class main {
             Function<T, String> getKey
     ) throws IOException {
         return Files.lines(Paths.get(archivo))
+                .filter(l -> !l.trim().isEmpty()) // evitar líneas vacías
                 .map(constructor)
                 .collect(Collectors.toMap(getKey, item -> item));
     }
@@ -113,24 +112,29 @@ public class main {
     }
 
     private static void generarReportes(Map<String, Vendedor> mapaVendedores, Map<String, Producto> mapaProductos) throws IOException {
+        // === Reporte de vendedores ===
         List<Vendedor> vendedoresOrdenados = mapaVendedores.values().stream()
             .sorted(Comparator.comparingDouble(v -> -v.ventasTotales))
             .collect(Collectors.toList());
 
         try (PrintWriter writer = new PrintWriter("reporte_vendedores.csv")) {
+            writer.println("Vendedor;VentasTotales");
             for (Vendedor v : vendedoresOrdenados) {
-                writer.printf("%s %s;%.2f%n", v.nombres, v.apellidos, v.ventasTotales);
+                writer.printf("%s %s (%s);%.2f%n", v.nombres, v.apellidos, v.numDoc, v.ventasTotales);
             }
         }
 
+        // === Reporte de productos ===
         List<Producto> productosOrdenados = mapaProductos.values().stream()
             .sorted(Comparator.comparingInt(p -> -p.cantidadVendida))
             .collect(Collectors.toList());
 
         try (PrintWriter writer = new PrintWriter("reporte_productos.csv")) {
+            writer.println("Producto;Precio;CantidadVendida");
             for (Producto p : productosOrdenados) {
-                writer.printf("%s;%.2f%n", p.nombre, p.precio);
+                writer.printf("%s;%.2f;%d%n", p.nombre, p.precio, p.cantidadVendida);
             }
         }
     }
 }
+
