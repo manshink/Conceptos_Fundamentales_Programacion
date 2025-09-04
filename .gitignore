@@ -39,6 +39,5 @@ build/
 
 # Archivos de pruebas
 test-output/
-/data
 *.csv
 *.txt
