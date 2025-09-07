@@ -34,7 +34,7 @@ class Vendedor {
     public String getNumDoc() { return numDoc; }
 }
 
-public class main {
+public class Main {
 
     public static void main(String[] args) {
         try {
@@ -137,4 +137,3 @@ public class main {
         }
     }
 }
-

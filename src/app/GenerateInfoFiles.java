@@ -57,7 +57,7 @@ public class GenerateInfoFiles {
      *  - M vendedores
      *  - 1 archivo de ventas por vendedor con K ventas (K aleatorio en rango)
      */
-    public static void main(String[] args) {
+    public static void Main(String[] args) {
         try {
             // 1) Crear carpetas si no existen
             ensureDirectories();
