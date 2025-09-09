@@ -2,6 +2,7 @@
 - Jonathan Moreno
 - Mateo Roldan
 - Jader Monterrosa
+- Alexander Vásquez Ossa
 
 ## Sistema Para Gestión de Ventas y Reportes
 
