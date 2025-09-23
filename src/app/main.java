@@ -1,139 +1,57 @@
 package app;
 
-import java.io.*;
-import java.nio.file.*;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.nio.file.*;
+import java.io.*;
 
-class Producto {
-    String id, nombre;
-    double precio;
-    int cantidadVendida = 0;
-
-    Producto(String id, String n, double p) {
-        this.id = id;
-        this.nombre = n;
-        this.precio = p;
-    }
-
-    public String getId() { return id; }
-}
-
-class Vendedor {
-    String tipoDoc, numDoc, nombres, apellidos;
-    double ventasTotales = 0.0;
-
-    Vendedor(String td, String nd, String n, String a) {
-        this.tipoDoc = td;
-        this.numDoc = nd;
-        this.nombres = n;
-        this.apellidos = a;
-    }
-
-    public String getNumDoc() { return numDoc; }
-}
+import app.ReportGenerator.Producto;
+import app.ReportGenerator.Vendedor;
 
 public class Main {
-
     public static void main(String[] args) {
-        try {
-            System.out.println("Iniciando...");
+        Scanner sc = new Scanner(System.in);
+        int opcion;
 
-            // === Archivos base ===
-            Map<String, Producto> mapaProductos = cargarDatos(
-                "data/productos.csv",
-                linea -> {
-                    String[] d = linea.split(";");
-                    return new Producto(d[0], d[1], Double.parseDouble(d[2]));
-                },
-                Producto::getId
-            );
+        do {
+            System.out.println("\n=== MENÚ DE GENERACIÓN Y REPORTES ===");
+            System.out.println("1. Generar archivo de productos");
+            System.out.println("2. Generar archivo de vendedores");
+            System.out.println("3. Generación Reporte Ventas (productos, vendedores y ventas)");
+            System.out.println("0. Salir");
+            System.out.print("Seleccione una opción: ");
+            opcion = sc.nextInt();
+            sc.nextLine();
 
-            Map<String, Vendedor> mapaVendedores = cargarDatos(
-                "data/vendedores.csv",
-                linea -> {
-                    String[] d = linea.split(";");
-                    return new Vendedor(d[0], d[1], d[2], d[3]);
-                },
-                Vendedor::getNumDoc
-            );
+            try {
+                switch (opcion) {
+                    case 1:
+                        System.out.print("Cantidad de productos: ");
+                        int p = sc.nextInt();
+                        GenerateInfoFiles.createProductsFile(p);
+                        System.out.println("Archivo productos.csv generado.");
+                        break;
+                    case 2:
+                        System.out.print("Cantidad de vendedores: ");
+                        int v = sc.nextInt();
+                        GenerateInfoFiles.createSalesManInfoFile(v);
+                        System.out.println("Archivo vendedores.csv generado.");
+                        break;
 
-            // === Archivos de ventas ===
-            Files.walk(Paths.get("data/ventas"))
-                .filter(path -> path.getFileName().toString().startsWith("vendedor_"))
-                .forEach(path -> procesarArchivoVenta(path, mapaProductos, mapaVendedores));
-
-            // === Generar reportes ===
-            generarReportes(mapaVendedores, mapaProductos);
-
-            System.out.println("¡Reportes generados en la carpeta raíz!");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static <T> Map<String, T> cargarDatos(
-            String archivo,
-            Function<String, T> constructor,
-            Function<T, String> getKey
-    ) throws IOException {
-        return Files.lines(Paths.get(archivo))
-                .filter(l -> !l.trim().isEmpty()) // evitar líneas vacías
-                .map(constructor)
-                .collect(Collectors.toMap(getKey, item -> item));
-    }
-
-    private static void procesarArchivoVenta(Path archivo, Map<String, Producto> prods, Map<String, Vendedor> vends) {
-        try {
-            List<String> lineas = Files.readAllLines(archivo);
-            if (lineas.isEmpty()) return;
-
-            String idVendedor = lineas.get(0).split(";")[1];
-            Vendedor vendedor = vends.get(idVendedor);
-            if (vendedor == null) return;
-
-            for (int i = 1; i < lineas.size(); i++) {
-                String[] datos = lineas.get(i).split(";");
-                if (datos.length < 2) continue;
-
-                Producto producto = prods.get(datos[0]);
-                int cantidad = Integer.parseInt(datos[1]);
-
-                if (producto != null) {
-                    vendedor.ventasTotales += producto.precio * cantidad;
-                    producto.cantidadVendida += cantidad;
+                    case 3:
+                        GenerateInfoFiles.Main(new String[]{});
+                        break;
+                    case 0:
+                        System.out.println("Saliendo...");
+                        break;
+                    default:
+                        System.out.println("Opción inválida.");
                 }
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            System.err.println("ADVERTENCIA procesando archivo: " + archivo.getFileName());
-            e.printStackTrace();
-        }
-    }
+        } while (opcion != 0);
 
-    private static void generarReportes(Map<String, Vendedor> mapaVendedores, Map<String, Producto> mapaProductos) throws IOException {
-        // === Reporte de vendedores ===
-        List<Vendedor> vendedoresOrdenados = mapaVendedores.values().stream()
-            .sorted(Comparator.comparingDouble(v -> -v.ventasTotales))
-            .collect(Collectors.toList());
-
-        try (PrintWriter writer = new PrintWriter("reporte_vendedores.csv")) {
-            writer.println("Vendedor;VentasTotales");
-            for (Vendedor v : vendedoresOrdenados) {
-                writer.printf("%s %s (%s);%.2f%n", v.nombres, v.apellidos, v.numDoc, v.ventasTotales);
-            }
-        }
-
-        // === Reporte de productos ===
-        List<Producto> productosOrdenados = mapaProductos.values().stream()
-            .sorted(Comparator.comparingInt(p -> -p.cantidadVendida))
-            .collect(Collectors.toList());
-
-        try (PrintWriter writer = new PrintWriter("reporte_productos.csv")) {
-            writer.println("Producto;Precio;CantidadVendida");
-            for (Producto p : productosOrdenados) {
-                writer.printf("%s;%.2f;%d%n", p.nombre, p.precio, p.cantidadVendida);
-            }
-        }
+        sc.close();
     }
 }
