@@ -95,19 +95,21 @@ public class ReportGenerator {
 
         Path vendedoresFile = dataDir.resolve("reporte_vendedores.csv");
         try (PrintWriter writer = new PrintWriter(vendedoresFile.toFile())) {
-            writer.println("Vendedor;VentasTotales");
+            writer.println("Vendedor;TipoDoc;Documento;VentasTotales");
             for (Vendedor v : vendedoresOrdenados) {
-                writer.printf("%s %s (%s);%.2f%n", v.nombres, v.apellidos, v.numDoc, v.ventasTotales);
+                String nombreCompleto = (v.nombres + " " + v.apellidos).trim();
+                writer.printf("%s;%s;%s;%.2f%n", nombreCompleto, v.tipoDoc, v.numDoc, v.ventasTotales);
             }
         }
 
         // === Consola ===
         System.out.println("\n📊 === REPORTE DE VENDEDORES ===");
-        System.out.printf("%-25s %-15s %12s%n", "Nombre", "Documento", "Ventas Totales");
-        System.out.println("---------------------------------------------------------------");
+        System.out.printf("%-25s %-8s %-15s %12s%n", "Nombre", "TipoDoc", "Documento", "Ventas Totales");
+        System.out.println("--------------------------------------------------------------------------");
         for (Vendedor v : vendedoresOrdenados) {
-            System.out.printf("%-25s %-15s %12.2f%n",
-                    v.nombres + " " + v.apellidos, v.numDoc, v.ventasTotales);
+            String nombreCompleto = (v.nombres + " " + v.apellidos).trim();
+            System.out.printf("%-25s %-8s %-15s %12.2f%n",
+                    nombreCompleto, v.tipoDoc, v.numDoc, v.ventasTotales);
         }
 
         // Reporte de productos
@@ -189,3 +191,4 @@ public class ReportGenerator {
         generarReportes(vendedores, productos);
     }
 }
+
