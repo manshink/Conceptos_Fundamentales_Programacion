@@ -38,7 +38,12 @@ public class Main {
                         break;
 
                     case 3:
+                        // Genera datos (productos, vendedores y ventas por vendedor)
                         GenerateInfoFiles.Main(new String[]{});
+                        
+                        // Procesa las ventas reales y genera los reportes
+                        ReportGenerator.runPipeline();
+                        
                         break;
                     case 0:
                         System.out.println("Saliendo...");
