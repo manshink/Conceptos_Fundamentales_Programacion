@@ -1,0 +1,33 @@
+Durante el desarrollo de este proyecto, nuestro equipo diseñó e implementó un sistema de gestión de ventas en Java, enfocado en el procesamiento de información sobre productos, vendedores y transacciones comerciales. Este trabajo no solo permitió aplicar los conocimientos adquiridos a lo largo del curso, sino también enfrentar situaciones reales propias del desarrollo de software profesional. A continuación, se presentan los aprendizajes más relevantes, sus posibles aplicaciones en el ámbito laboral y las principales dificultades encontradas.
+
+1. Lo aprendido durante el desarrollo del proyecto
+
+El proyecto fue una oportunidad integral de aprendizaje, tanto en el aspecto técnico como en el trabajo colaborativo. En primer lugar, se fortalecieron los fundamentos de la Programación Orientada a Objetos (POO), aplicando principios como encapsulamiento, validación de datos y métodos de fábrica (factory methods) mediante la implementación de constructores robustos y funciones estáticas como fromCsv(). Esto permitió estructurar el código de manera más clara y modular.
+
+En segundo lugar, se adquirieron destrezas en el manejo de archivos y flujos de datos (Streams), utilizando la API de Java 8+ para realizar un procesamiento más declarativo y eficiente. El uso de Files.lines() combinado con bloques try-with-resources garantizó la liberación automática de recursos y un manejo seguro de excepciones como IOException o NumberFormatException.
+
+Asimismo, se reforzó la comprensión del uso de estructuras de datos como Map<String, Producto> y Map<String, Vendedor>, logrando búsquedas en tiempo constante O(1) y optimizando la gestión de grandes volúmenes de información. También se incorporó java.util.logging para registrar eventos y errores de ejecución, mejorando la trazabilidad del sistema respecto a simples mensajes en consola.
+
+Por otro lado, el proyecto permitió practicar la documentación técnica con JavaDoc, detallando parámetros, retornos y excepciones de cada método. Este proceso reforzó la importancia de mantener un código legible, autoexplicativo y fácil de mantener.
+
+Finalmente, en el ámbito colaborativo, el uso de GitHub como plataforma de control de versiones representó un aprendizaje clave. Se trabajó con ramas independientes, pull requests y revisiones de código, lo cual fomentó la organización y la comunicación dentro del equipo. Esta experiencia permitió entender el flujo de trabajo profesional que se sigue en entornos reales de desarrollo de software.
+
+2. Aplicaciones en la vida profesional
+
+Las habilidades y conocimientos adquiridos durante este proyecto tienen aplicación directa en el campo laboral de la ingeniería de software. La experiencia obtenida en la creación de este sistema puede trasladarse a tareas como el desarrollo de módulos de ventas o sistemas ERP, la integración de APIs en lugar del intercambio de archivos CSV, la migración de datos entre plataformas, y el análisis de información a gran escala.
+
+Además, el dominio de herramientas de colaboración como Git y metodologías ágiles favorece la participación en proyectos distribuidos, donde la comunicación y la gestión de versiones son fundamentales. Este proyecto también reforzó la comprensión de buenas prácticas de ingeniería como la escalabilidad, la mantenibilidad del código y la importancia de un flujo de trabajo documentado y transparente.
+
+A nivel personal, este proceso fortaleció la mentalidad de aprendizaje continuo. Entender que los errores no son simples fallas, sino oportunidades de mejora, fomenta una actitud profesional proactiva frente a los desafíos técnicos. Igualmente, el trabajo en equipo mostró que la colaboración multiplica las capacidades individuales y que el éxito de un proyecto depende tanto de la calidad del código como de la comunicación entre los desarrolladores.
+
+3. Dificultades durante el desarrollo del proyecto
+
+A lo largo del desarrollo surgieron diversas dificultades que contribuyeron a nuestro crecimiento como equipo. Uno de los principales retos fue la integración de código proveniente de diferentes ramas, lo que generó conflictos en Git que debieron resolverse mediante comunicación y revisión conjunta. Este proceso, aunque desafiante, nos enseñó la importancia de la coordinación y la planificación en proyectos colaborativos.
+
+Otra dificultad fue la validación de los datos leídos desde los archivos CSV, ya que algunos registros presentaban formatos inconsistentes. Esto nos llevó a implementar mecanismos más robustos de verificación y manejo de excepciones, reforzando la calidad y estabilidad del programa.
+
+Finalmente, el diseño del sistema de logging presentó un reto conceptual al principio, ya que implicaba comprender la diferencia entre registrar mensajes informativos, advertencias y errores. Superar esta dificultad nos permitió construir una aplicación más profesional y confiable.
+
+Conclusión
+
+En síntesis, este proyecto representó un espacio de aprendizaje integral que combinó teoría, práctica y trabajo en equipo. Las destrezas adquiridas en programación, documentación, control de versiones y resolución de conflictos constituyen una base sólida para nuestra vida profesional como ingenieros de software. Las dificultades encontradas, lejos de ser obstáculos, se convirtieron en experiencias formativas que fortalecieron nuestras competencias técnicas y colaborativas, preparándonos para afrontar con mayor madurez los retos del mundo laboral.
