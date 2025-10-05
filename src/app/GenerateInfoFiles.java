@@ -21,6 +21,8 @@ import java.util.*;
  */
 public class GenerateInfoFiles {
 
+	private static final boolean DEBUG = false;
+
     // === Rutas ===
     private static final Path DATA_DIR      = Paths.get("data");
     private static final Path SALES_DIR     = DATA_DIR.resolve("ventas");
@@ -74,8 +76,9 @@ public class GenerateInfoFiles {
 
             System.out.println("Generación finalizada correctamente. Archivos en carpeta ./data");
         } catch (Exception ex) {
-            System.err.println("Error durante la generación de archivos: " + ex.getMessage());
-            ex.printStackTrace();
+            System.err.println("❌ Error durante la generación de archivos: " + ex.getMessage());
+            if (DEBUG) ex.printStackTrace();
+            System.err.println("Sugerencia: Verifique permisos de escritura en la carpeta ./data");
         }
     }
 
@@ -218,8 +221,14 @@ public class GenerateInfoFiles {
     // =====================================================
 
     private static void ensureDirectories() throws IOException {
-        if (!Files.exists(DATA_DIR)) Files.createDirectories(DATA_DIR);
-        if (!Files.exists(SALES_DIR)) Files.createDirectories(SALES_DIR);
+        if (!Files.exists(DATA_DIR)) {
+            Files.createDirectories(DATA_DIR);
+            System.out.println("📂 Carpeta ./data creada automáticamente.");
+        }
+        if (!Files.exists(SALES_DIR)) {
+            Files.createDirectories(SALES_DIR);
+            System.out.println("📂 Carpeta ./data/ventas creada automáticamente.");
+        }
     }
 
     private static int randomBetween(int a, int b) {

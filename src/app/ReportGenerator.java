@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 public class ReportGenerator {
 
+	private static final boolean DEBUG = false;
+	
     // === MODELOS ===
     public static class Producto {
         public String id, nombre;
@@ -57,7 +59,10 @@ public class ReportGenerator {
             List<String> lineas = Files.readAllLines(archivo);
             if (lineas.isEmpty()) return;
 
-            String idVendedor = lineas.get(0).split(";")[1].trim();
+            String[] cabecera = lineas.get(0).split(";");
+            if (cabecera.length < 2) return;
+            String idVendedor = cabecera[1].trim();
+            
             Vendedor vendedor = vends.get(idVendedor);
             if (vendedor == null) return;
 
@@ -169,6 +174,21 @@ public class ReportGenerator {
     	
         Path dataDir = Paths.get("data");
         Path salesDir = dataDir.resolve("ventas");
+        
+
+        // Validaciones iniciales
+        if (!Files.exists(dataDir)) {
+            System.err.println("❌ No existe la carpeta ./data. Ejecute primero la generación de archivos.");
+            return;
+        }
+        if (!Files.exists(dataDir.resolve("productos.csv"))) {
+            System.err.println("❌ Archivo productos.csv no encontrado en ./data");
+            return;
+        }
+        if (!Files.exists(dataDir.resolve("vendedores.csv"))) {
+            System.err.println("❌ Archivo vendedores.csv no encontrado en ./data");
+            return;
+        }
 
         Map<String, Producto> productos = cargarDatos(
                 dataDir.resolve("productos.csv").toString(),
@@ -182,17 +202,32 @@ public class ReportGenerator {
                 v -> v.numDoc
         );
 
+        // Procesamiento de ventas
+        int procesados = 0;
+        int errores = 0;
+
         if (Files.exists(salesDir)) {
             try (var stream = Files.list(salesDir)) {
-                stream.filter(Files::isRegularFile)
-                      .filter(p -> p.toString().endsWith(".csv"))
-                      .forEach(p -> procesarArchivoVenta(p, productos, vendedores));
+                for (Path p : stream.filter(Files::isRegularFile).filter(f -> f.toString().endsWith(".csv")).toList()) {
+                    try {
+                        procesarArchivoVenta(p, productos, vendedores);
+                        procesados++;
+                    } catch (Exception e) {
+                        errores++;
+                        System.err.printf("⚠️ Error procesando archivo %s: %s%n", p.getFileName(), e.getMessage());
+                        if (DEBUG) e.printStackTrace();
+                    }
+                }
             }
         } else {
-            System.err.println("No existe el directorio de ventas: " + salesDir.toString());
+            System.err.println("⚠️ No existe el directorio de ventas: " + salesDir.toString());
         }
+
+        // Resumen
+        System.out.printf("📊 Resumen: %d archivos procesados correctamente, %d con errores.%n", procesados, errores);
 
         generarReportes(vendedores, productos);
     }
+    
 }
 
