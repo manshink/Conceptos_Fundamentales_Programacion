@@ -37,16 +37,13 @@ public class Main {
                         System.out.println("Archivo vendedores.csv generado.");
                         break;
 
-                    case 3:
-                        // Genera datos (productos, vendedores y ventas por vendedor)
-                        GenerateInfoFiles.Main(new String[]{});
-                        
-                        // Procesa las ventas reales y genera los reportes
+                    case 3:                        
+
                         ReportGenerator.runPipeline();
                         
                         break;
                     case 0:
-                        System.out.println("Saliendo...");
+                        System.out.println("Finalización exitosa...");
                         break;
                     default:
                         System.out.println("Opción inválida.");

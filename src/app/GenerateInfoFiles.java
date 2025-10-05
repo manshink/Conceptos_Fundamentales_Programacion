@@ -154,7 +154,6 @@ public class GenerateInfoFiles {
             for (int i = 0; i < randomSalesCount; i++) {
                 Product p = catalog.get(RNG.nextInt(catalog.size()));
                 int qty = randomBetween(minQty, maxQty);
-                // ⚠️ CORREGIDO: sin punto y coma extra al final
                 bw.write(p.id + ";" + qty);
                 bw.newLine();
             }
@@ -276,4 +275,8 @@ public class GenerateInfoFiles {
         }
         return list;
     }
+    
+
+    
+    
 }

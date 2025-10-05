@@ -1,6 +1,7 @@
 package app;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.function.Function;
@@ -94,7 +95,8 @@ public class ReportGenerator {
                 .toList();
 
         Path vendedoresFile = dataDir.resolve("reporte_vendedores.csv");
-        try (PrintWriter writer = new PrintWriter(vendedoresFile.toFile())) {
+        try (PrintWriter writer = new PrintWriter(
+        	    Files.newBufferedWriter(vendedoresFile, StandardCharsets.UTF_8))) {
             writer.println("Vendedor;TipoDoc;Documento;VentasTotales");
             for (Vendedor v : vendedoresOrdenados) {
                 String nombreCompleto = (v.nombres + " " + v.apellidos).trim();
@@ -118,7 +120,8 @@ public class ReportGenerator {
                 .toList();
 
         Path productosFile = dataDir.resolve("reporte_productos.csv");
-        try (PrintWriter writer = new PrintWriter(productosFile.toFile())) {
+        try (PrintWriter writer = new PrintWriter(
+        	    Files.newBufferedWriter(vendedoresFile, StandardCharsets.UTF_8))) {
             writer.println("Producto;Precio;CantidadVendida");
             for (Producto p : productosOrdenados) {
                 writer.printf("%s;%.2f;%d%n", p.nombre, p.precio, p.cantidadVendida);
@@ -163,6 +166,7 @@ public class ReportGenerator {
     }
 
     public static void runPipeline() throws IOException {
+    	
         Path dataDir = Paths.get("data");
         Path salesDir = dataDir.resolve("ventas");
 
