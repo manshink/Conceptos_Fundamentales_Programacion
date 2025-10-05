@@ -40,4 +40,3 @@ build/
 # Archivos de pruebas
 test-output/
 *.csv
-*.txt
