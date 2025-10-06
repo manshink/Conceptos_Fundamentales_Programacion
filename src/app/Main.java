@@ -6,9 +6,38 @@ import java.io.*;
 import app.ReportGenerator.Producto;
 import app.ReportGenerator.Vendedor;
 
+/**
+ * Clase principal del sistema.
+ * <p>
+ * Proporciona un menú en consola para:
+ * <ul>
+ *   <li>Generar archivo de productos.</li>
+ *   <li>Generar archivo de vendedores.</li>
+ *   <li>Generar reportes a partir de los archivos creados.</li>
+ * </ul>
+ *
+ * Los datos se almacenan en la carpeta <b>./data</b>.
+ */
 public class Main {
-    private static final boolean DEBUG = false; // Activa trazas detalladas solo en desarrollo
 
+    /**
+     * Bandera de depuración.
+     * <p>
+     * Si está en {@code true}, muestra trazas completas de errores (stacktrace).
+     * Si está en {@code false}, muestra mensajes resumidos.
+     * </p>
+     */
+    private static final boolean DEBUG = false;
+
+    /**
+     * Método principal del programa.
+     * <p>
+     * Muestra un menú en consola y permite al usuario elegir acciones
+     * relacionadas con la generación de archivos y reportes.
+     * </p>
+     *
+     * @param args Argumentos de línea de comandos (no utilizados).
+     */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int opcion;
@@ -56,4 +85,5 @@ public class Main {
         sc.close();
     }
 }
+
 
