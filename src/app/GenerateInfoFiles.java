@@ -8,31 +8,41 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 /**
- * GenerateInfoFiles
- * ------------------
- * Genera datos de ejemplo para el sistema:
- *  - ./data/productos.csv                    (ID;Nombre;Precio)
- *  - ./data/vendedores.csv                   (TipoDocumento;NumeroDocumento;Nombres;Apellidos)
- *  - ./data/ventas/ventas_{TipoDoc}_{Num}.csv
- *      * 1a línea: TipoDocumento;NumeroDocumento
- *      * siguientes: IDProducto;Cantidad
+ * {@code GenerateInfoFiles} es la clase encargada de generar datos de ejemplo
+ * en formato CSV para el sistema de reportes.
+ * <p>
+ * Archivos generados en la carpeta <b>./data</b>:
+ * <ul>
+ *   <li><b>productos.csv</b> → Catálogo de productos (ID;Nombre;Precio).</li>
+ *   <li><b>vendedores.csv</b> → Lista de vendedores (TipoDocumento;NumeroDocumento;Nombres;Apellidos).</li>
+ *   <li><b>ventas/ventas_{TipoDoc}_{Num}.csv</b> → Ventas asociadas a cada vendedor.</li>
+ * </ul>
+ * </p>
  *
- * IMPORTANTE: Este archivo solo genera datos. Los reportes se hacen con ReportGenerator.runPipeline().
+ * <p>
+ * <b>IMPORTANTE:</b> Esta clase <i>solo</i> genera datos.
+ * Los reportes se realizan mediante {@link ReportGenerator#runPipeline()}.
+ * </p>
  */
 public class GenerateInfoFiles {
 
-	private static final boolean DEBUG = false;
+    /**
+     * Bandera de depuración.
+     * Si {@code true}, muestra trazas completas de error.
+     * Si {@code false}, muestra mensajes resumidos.
+     */
+    private static final boolean DEBUG = false;
 
-    // === Rutas ===
+    // === Rutas de trabajo ===
     private static final Path DATA_DIR      = Paths.get("data");
     private static final Path SALES_DIR     = DATA_DIR.resolve("ventas");
     private static final Path PRODUCTS_FILE = DATA_DIR.resolve("productos.csv");
     private static final Path SALESMEN_FILE = DATA_DIR.resolve("vendedores.csv");
 
-    // RNG con semilla fija para reproducibilidad (modificar si se desean datos distintos cada ejecución)
+    // Generador aleatorio con semilla fija (para reproducibilidad)
     private static final Random RNG = new Random(2025_0902);
 
-    // Listas rápidas de nombres para ejemplo
+    // Listas de ejemplo
     private static final String[] NOMBRES = {
             "Camila","Sofía","Valentina","Isabella","Mariana","Sebastián","Santiago","Mateo",
             "Samuel","Daniel","Juan","Andrés","María","Laura","Sara","Nicolás","David","Lucía"
@@ -42,39 +52,41 @@ public class GenerateInfoFiles {
             "Torres","Vargas","Rojas","Moreno","Romero","Jiménez","Reyes","Castaño","Álvarez"
     };
     private static final String[] TIPOS_DOC = {"CC","CE","TI"};
-
     private static final String PRODUCT_PREFIX = "P";
 
     /**
-     * No es el "public static void main(String[])" estándar.
-     * Es un método utilitario invocado desde app.Main (menú) como GenerateInfoFiles.Main(...).
+     * Método utilitario (no es un {@code public static void main} estándar).
+     * <p>
+     * Invocado desde {@code app.Main} para generar todos los archivos de ejemplo.
+     * </p>
+     *
+     * @param args no utilizado.
      */
     public static void Main(String[] args) {
         try {
-            // Crear carpetas
             ensureDirectories();
 
-            // Parámetros por defecto (ajustables)
-            int productsCount   = 50;   // cantidad de productos
-            int salesmanCount   = 25;   // cantidad de vendedores
-            int minSalesPerFile = 5;    // ventas mínimas por vendedor
-            int maxSalesPerFile = 25;   // ventas máximas por vendedor
-            int minQtyPerSale   = 1;    // cantidad mínima por línea de venta
-            int maxQtyPerSale   = 10;   // cantidad máxima por línea de venta
+            // Parámetros por defecto
+            int productsCount   = 50;
+            int salesmanCount   = 25;
+            int minSalesPerFile = 5;
+            int maxSalesPerFile = 25;
+            int minQtyPerSale   = 1;
+            int maxQtyPerSale   = 10;
 
-            // 1) Productos y catálogo en memoria
+            // 1) Productos
             List<Product> catalog = createProductsFile(productsCount);
 
-            // 2) Vendedores y lista en memoria
+            // 2) Vendedores
             List<Salesman> salesmen = createSalesManInfoFile(salesmanCount);
 
-            // 3) Un archivo de ventas por vendedor
+            // 3) Ventas por cada vendedor
             for (Salesman s : salesmen) {
                 int randomSalesCount = randomBetween(minSalesPerFile, maxSalesPerFile);
                 createSalesMenFile(randomSalesCount, s.getFullName(), s.documentNumber, catalog, s.documentType, minQtyPerSale, maxQtyPerSale);
             }
 
-            System.out.println("Generación finalizada correctamente. Archivos en carpeta ./data");
+            System.out.println("✅ Generación finalizada correctamente. Archivos en ./data");
         } catch (Exception ex) {
             System.err.println("❌ Error durante la generación de archivos: " + ex.getMessage());
             if (DEBUG) ex.printStackTrace();
@@ -85,10 +97,14 @@ public class GenerateInfoFiles {
     // =====================================================
     // MODELOS mínimos (solo para generación de archivos)
     // =====================================================
+
+    /**
+     * Modelo simple que representa un producto.
+     */
     public static class Product {
         public final String id;
         public final String name;
-        public final long unitPrice; // enteros para CSV, compatibles con parse double después
+        public final long unitPrice;
 
         public Product(String id, String name, long unitPrice) {
             this.id = Objects.requireNonNull(id);
@@ -97,6 +113,9 @@ public class GenerateInfoFiles {
         }
     }
 
+    /**
+     * Modelo simple que representa un vendedor.
+     */
     public static class Salesman {
         public final String documentType;
         public final long documentNumber;
@@ -110,25 +129,39 @@ public class GenerateInfoFiles {
             this.lastNames = lastNames;
         }
 
+        /** @return Nombre completo (nombres + apellidos). */
         public String getFullName() {
             return (firstNames + " " + lastNames).trim();
         }
     }
 
     // =====================================================
-    // MÉTODOS REQUERIDOS / API de generación
+    // MÉTODOS DE GENERACIÓN
     // =====================================================
 
     /**
-     * Crea un archivo de ventas para un vendedor (firma solicitada).
-     * Delegamos a la sobrecarga completa con tipoDoc="CC" y cantidades 1..10.
+     * Crea un archivo de ventas para un vendedor con configuración por defecto.
+     *
+     * @param randomSalesCount número de ventas a generar.
+     * @param name nombre del vendedor.
+     * @param id número de documento.
+     * @throws IOException si ocurre un error de escritura.
      */
     public static void createSalesMenFile(int randomSalesCount, String name, long id) throws IOException {
         createSalesMenFile(randomSalesCount, name, id, null, "CC", 1, 10);
     }
 
     /**
-     * Sobrecarga que permite pasar catálogo ya cargado, tipoDoc y rango de cantidades.
+     * Crea un archivo de ventas para un vendedor con parámetros completos.
+     *
+     * @param randomSalesCount número de ventas a generar.
+     * @param name nombre del vendedor.
+     * @param id número de documento.
+     * @param catalog catálogo de productos (si es {@code null}, se carga de disco).
+     * @param tipoDoc tipo de documento.
+     * @param minQty cantidad mínima por venta.
+     * @param maxQty cantidad máxima por venta.
+     * @throws IOException si ocurre un error de escritura.
      */
     private static void createSalesMenFile(int randomSalesCount,
                                            String name,
@@ -139,7 +172,6 @@ public class GenerateInfoFiles {
         if (randomSalesCount <= 0) randomSalesCount = 1;
         if (tipoDoc == null || tipoDoc.trim().isEmpty()) tipoDoc = "CC";
 
-        // Si no pasaron catálogo, lo leemos desde disco (productos.csv)
         if (catalog == null) {
             catalog = readCatalogFromFile(PRODUCTS_FILE);
         }
@@ -149,11 +181,9 @@ public class GenerateInfoFiles {
         try (BufferedWriter bw = Files.newBufferedWriter(file, StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 
-            // Cabecera: TipoDocumento;NumeroDocumento
             bw.write(tipoDoc + ";" + id);
             bw.newLine();
 
-            // Líneas de ventas: IDProducto;Cantidad
             for (int i = 0; i < randomSalesCount; i++) {
                 Product p = catalog.get(RNG.nextInt(catalog.size()));
                 int qty = randomBetween(minQty, maxQty);
@@ -164,7 +194,11 @@ public class GenerateInfoFiles {
     }
 
     /**
-     * Crea el archivo de productos (ID;Nombre;Precio) y devuelve el catálogo en memoria.
+     * Crea el archivo de productos y devuelve el catálogo en memoria.
+     *
+     * @param productsCount número de productos a generar.
+     * @return lista de productos.
+     * @throws IOException si ocurre un error de escritura.
      */
     public static List<Product> createProductsFile(int productsCount) throws IOException {
         if (productsCount < 1) productsCount = 1;
@@ -176,7 +210,7 @@ public class GenerateInfoFiles {
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 
             for (int i = 1; i <= productsCount; i++) {
-                String id = PRODUCT_PREFIX + df.format(i); // P0001, P0002, ...
+                String id = PRODUCT_PREFIX + df.format(i);
                 String name = generateProductName(i);
                 long unitPrice = generatePositivePrice();
                 catalog.add(new Product(id, name, unitPrice));
@@ -188,8 +222,11 @@ public class GenerateInfoFiles {
     }
 
     /**
-     * Crea el archivo de vendedores (TipoDocumento;NumeroDocumento;Nombres;Apellidos)
-     * y devuelve la lista en memoria.
+     * Crea el archivo de vendedores y devuelve la lista en memoria.
+     *
+     * @param salesmanCount número de vendedores a generar.
+     * @return lista de vendedores.
+     * @throws IOException si ocurre un error de escritura.
      */
     public static List<Salesman> createSalesManInfoFile(int salesmanCount) throws IOException {
         if (salesmanCount < 1) salesmanCount = 1;
@@ -220,6 +257,7 @@ public class GenerateInfoFiles {
     // UTILIDADES
     // =====================================================
 
+    /** Asegura que existan las carpetas ./data y ./data/ventas. */
     private static void ensureDirectories() throws IOException {
         if (!Files.exists(DATA_DIR)) {
             Files.createDirectories(DATA_DIR);
@@ -243,7 +281,6 @@ public class GenerateInfoFiles {
     private static long uniquePositiveId(Set<Long> used) {
         long n;
         do {
-            // 8-10 dígitos positivos
             n = 10_000_000L + (Math.abs(RNG.nextLong()) % 900_000_000L);
         } while (used.contains(n));
         used.add(n);
@@ -251,17 +288,19 @@ public class GenerateInfoFiles {
     }
 
     private static long generatePositivePrice() {
-        // Precio unitario entre 1_000 y 500_000 (enteros)
         return 1_000L + (Math.abs(RNG.nextLong()) % 499_000L);
     }
 
     private static String generateProductName(int index) {
-        // Nombre simple pero legible
         return "Producto " + String.format("%04d", index);
     }
 
     /**
-     * Lee el catálogo desde productos.csv para reusar en createSalesMenFile(...).
+     * Lee el catálogo desde {@code productos.csv}.
+     *
+     * @param productsCsv ruta del archivo de productos.
+     * @return lista de productos cargados.
+     * @throws IOException si ocurre un error de lectura.
      */
     private static List<Product> readCatalogFromFile(Path productsCsv) throws IOException {
         List<Product> list = new ArrayList<>();
@@ -279,13 +318,9 @@ public class GenerateInfoFiles {
                 long price = Long.parseLong(d[2].trim());
                 list.add(new Product(id, name, price));
             } catch (Exception ignore) {
-                System.err.println("Línea inválida en productos.csv: " + trimmed);
+                System.err.println("⚠️ Línea inválida en productos.csv: " + trimmed);
             }
         }
         return list;
     }
-    
-
-    
-    
 }
